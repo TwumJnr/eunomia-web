@@ -24,10 +24,21 @@ const routes: Array<RouteRecordRaw> = [
       ),
   },
   {
-    path: "/about",
-    name: "about",
+    path: "/event",
+    name: "event",
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+      import(
+        /* webpackChunkName: "eventDetails" */ "../views/EventDetails.vue"
+      ),
+    // children: [
+    //   {
+    //     path: "position",
+    //     component: () =>
+    //       import(
+    //         /* webpackChunkName: "eventDetails" */ "../components/EventPosition.vue"
+    //       ),
+    //   },
+    // ],
   },
 ];
 

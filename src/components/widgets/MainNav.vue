@@ -18,7 +18,7 @@ onMounted(() => {
       <RouterLink to="/" class="btn">
         <div class="inst-details d-flex align-items-end">
           <!-- <img src="@/assets/img/pgh_logo.png" alt="Promasidor Logo" width="70" /> -->
-          <h1 class="m-0 ml-2">Onga Promo</h1>
+          <h1 class="m-0 ml-2">Eunomia</h1>
         </div>
       </RouterLink>
       <div class="buttons">

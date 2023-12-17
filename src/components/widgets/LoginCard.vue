@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { baseURL } from "@/helpers/services/axiosApi";
 import { useRouter } from "vue-router";
-import axios from "axios";
-import { ref, onMounted } from "vue";
+import { AxiosInstance } from "axios";
+import { ref, onMounted, inject } from "vue";
 import type { User } from "@/helpers/types/Users";
 import { getUserSession } from "@/helpers/functions/general";
 
+const axios = inject<AxiosInstance>("axios");
 const router = useRouter();
 const username = ref("");
 const password = ref("");
@@ -15,8 +15,9 @@ const isVisible = ref(false);
 const login = () => {
   loading.value = true;
   const postData = { username: username.value, password: password.value };
-  axios
-    .post(`${baseURL}/v1/auth/login`, postData)
+
+  axios!
+    .post("/v1/auth/login", postData)
     .then((response) => {
       const data: User = response.data;
       // console.log({ data });
@@ -40,6 +41,11 @@ const login = () => {
     })
     .catch((error) => {
       console.log(error);
+      switch (error.response.status) {
+        case 400:
+          console.log("error code is 400");
+          break;
+      }
     })
     .finally(() => {
       loading.value = false;
@@ -49,6 +55,8 @@ const login = () => {
 onMounted(() => {
   const session = getUserSession();
   if (!session) return;
+  if (!session.user) return;
+  console.log({ session });
   if (session.user.id) router.push("/");
 });
 </script>

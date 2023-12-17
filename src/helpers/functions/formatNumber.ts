@@ -16,7 +16,9 @@ export const formatNumber = (value: number | string | undefined | null) => {
   return numeral(value).format("0,0[.]0000");
 };
 
-export const formatWholeNumber = (value: number | string | undefined | null) => {
+export const formatWholeNumber = (
+  value: number | string | undefined | null
+) => {
   if (!value) return " - ";
   return numeral(value).format("0,0");
 };

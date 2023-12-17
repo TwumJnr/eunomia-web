@@ -25,6 +25,16 @@ export const getUserSession = () => {
   } else router.replace("/login");
 };
 
+export const getUserToken = () => {
+  const session = sessionStorage.getItem("userDetails");
+  if (!session) return null;
+
+  const temp = JSON.parse(session);
+  if (!temp) return null;
+
+  return temp.token;
+};
+
 /**
  * The function checks if the user is authenticated by retrieving the session from sessionStorage and
  * returning true if a token is present.

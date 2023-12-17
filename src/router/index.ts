@@ -16,6 +16,14 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "login" */ "../views/LoginView.vue"),
   },
   {
+    path: "/change-password",
+    name: "Change Password",
+    component: () =>
+      import(
+        /* webpackChunkName: "change-password" */ "../views/ChangePasswordView.vue"
+      ),
+  },
+  {
     path: "/about",
     name: "about",
     component: () =>
@@ -30,7 +38,6 @@ const router = createRouter({
 
 // eslint-disable-next-line
 router.beforeEach(async (to, from) => {
-  console.log({ env: process.env });
   if (!isAuthenticated() && to.name !== "login") {
     return router.replace("/login");
   } else return true;

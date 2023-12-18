@@ -1,8 +1,18 @@
 <script setup lang="ts">
 import { RouterView, useRouter } from "vue-router";
 import NavWidget from "@/components/widgets/MainNav.vue";
+import axios from "axios";
+import { onMounted } from "vue";
 
 const router = useRouter();
+
+const pingServer = async () => {
+  await axios.get(`${process.env.VUE_APP_BASE_URL}`);
+};
+
+onMounted(async () => {
+  pingServer();
+});
 
 const logout = () => {
   sessionStorage.clear();

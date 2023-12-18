@@ -46,8 +46,8 @@ const addUser = () => {
   const postBody = { ...newUser.value };
   axios!
     .post(`/v1/users/add`, postBody)
-    .then((response) => {
-      console.log({ response });
+    .then(() => {
+      // console.log({ response });
 
       newUser.value = {
         firstName: "",

@@ -49,6 +49,16 @@ export const isAuthenticated = () => {
   return false;
 };
 
+export const getUserName = (
+  user = { firstName: "", lastName: "", otherName: "" }
+) => {
+  let name = user.firstName;
+  name += user.otherName ? ` ${user.otherName}` : "";
+  name += ` ${user.lastName}`;
+
+  return name;
+};
+
 /**
  * The `groupBy` function takes an array of objects and a key getter function, and returns an array of
  * objects grouped by the values of the specified key.

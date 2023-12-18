@@ -4,10 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 import type { Event } from "@/helpers/types/Event";
 import type { ElectorialArea } from "@/helpers/types/ElectorialArea";
 import type { ElectorialPosition } from "@/helpers/types/ElectorialPosition";
+import type { Candidate } from "@/helpers/types/Candidate";
 import { onMounted, ref, inject, computed } from "vue";
 import { AxiosInstance, AxiosResponse } from "axios";
 import type { Ref } from "vue";
 import { formatDate } from "@/helpers/functions/date";
+import { getUserName } from "@/helpers/functions/general";
 import { getNumberWords } from "@/helpers/functions/formatNumber";
 
 const route = useRoute();
@@ -22,6 +24,12 @@ const loading = ref(false);
 const availableAreas: Ref<ElectorialArea[]> = ref([]);
 const tempAreas: Ref<ElectorialArea[]> = ref([]);
 const eventDetails: Ref<Event> = ref({ eventName: "", eventDate: "" });
+const newCandidate: Ref<Candidate> = ref({
+  firstName: "",
+  lastName: "",
+  otherName: "",
+  gender: "",
+});
 const selectedArea: Ref<ElectorialArea> = ref({
   areaName: "",
   event: eventDetails.value,
@@ -35,6 +43,37 @@ const newPosition: Ref<ElectorialPosition> = ref({
   numberRequired: 1,
   event: eventDetails.value,
 });
+
+const addCandidate = () => {
+  loading.value = true;
+
+  const postBody = {
+    ...newCandidate.value,
+    electorialArea: selectedArea.value.id,
+    event: eventId,
+    electorialPosition: selectedPosition.value?.id,
+  };
+
+  axios!
+    .post("/v1/candidates/add", postBody)
+    .then((response) => {
+      document.getElementById("addCandidateModalClose")?.click();
+      newCandidate.value = {
+        firstName: "",
+        lastName: "",
+        otherName: "",
+        gender: "",
+      };
+      const data = response.data;
+      selectedArea.value.candidates?.push(data);
+    })
+    .catch((error) => {
+      console.log({ error });
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 
 const selectArea = (area: ElectorialArea) => {
   selectedArea.value = area;
@@ -245,12 +284,109 @@ onMounted(() => {
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- <div class="row mt-4">
-        <div class="col-md">
-          <router-view />
+    <!--  Add candidate Modal -->
+    <div
+      class="modal fade"
+      id="addCandidateModal"
+      aria-labelledby="addCandidateModalLabel"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+    >
+      <div
+        class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+      >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="addCandidateModalLabel">
+              New Candidate for {{ selectedPosition?.positionName }} in
+              {{ selectedArea.areaName }}
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              id="addCandidateModalClose"
+              data-bs-toggle="modal"
+              data-bs-target="#positionDetailsModal"
+              aria-label="Close"
+            />
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="addCandidate">
+              <div class="row">
+                <div class="col-md">
+                  <div class="form-floating">
+                    <input
+                      class="form-control"
+                      id="firstNameField"
+                      v-model="newCandidate.firstName"
+                      placeholder="Firstname"
+                      required
+                    />
+                    <label for="firstNameField">Firstname</label>
+                  </div>
+                </div>
+                <div class="col-md">
+                  <div class="form-floating">
+                    <input
+                      class="form-control"
+                      id="otherNameField"
+                      v-model="newCandidate.otherName"
+                      placeholder="Othername"
+                    />
+                    <label for="otherNameField">Othername</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md">
+                  <div class="form-floating">
+                    <input
+                      class="form-control"
+                      id="lastNameField"
+                      v-model="newCandidate.lastName"
+                      placeholder="lastName"
+                      required
+                    />
+                    <label for="lastNameField">Lastname</label>
+                  </div>
+                </div>
+                <div class="col-md">
+                  <div class="form-floating">
+                    <select
+                      class="form-select"
+                      id="genderField"
+                      aria-label="Floating label select example"
+                    >
+                      <option selected disabled>-- Gender --</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    <label for="genderField">Gender</label>
+                  </div>
+                </div>
+              </div>
+              <div class="d-grid mt-6">
+                <button
+                  class="btn btn-primary"
+                  style="
+                    color: var(--white);
+                    font-weight: bolder;
+                    box-shadow: var(--shadow);
+                  "
+                  type="submit"
+                  :disabled="loading"
+                >
+                  Add Candidate
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div> -->
+      </div>
     </div>
 
     <!--  Assign Area Modal -->
@@ -431,8 +567,50 @@ onMounted(() => {
                 <div class="d-flex align-items-center" style="height: 100%">
                   <div class="card" style="width: 100%">
                     <div class="card-body">
-                      <h6>Candidates</h6>
-                      <span>Candidates come here </span>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <h6>Candidates For {{ selectedArea.areaName }}</h6>
+                        <button
+                          class="btn"
+                          data-bs-toggle="modal"
+                          data-bs-target="#addCandidateModal"
+                        >
+                          <div class="d-flex align-items-center">
+                            <span class="material-symbols-rounded">
+                              add_circle
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+                      <div
+                        class="mt-4"
+                        v-if="
+                          selectedArea.candidates &&
+                          selectedArea.candidates?.length > 0
+                        "
+                      >
+                        <div
+                          class="entry"
+                          v-for="(candidate, i) in selectedArea.candidates"
+                        >
+                          <span class="count">{{ i + 1 }}</span>
+                          <span class="label">{{
+                            getUserName({
+                              firstName: candidate.firstName,
+                              otherName: candidate.otherName,
+                              lastName: candidate.lastName,
+                            })
+                          }}</span>
+                        </div>
+                      </div>
+                      <div
+                        class="alert alert-warning m-0 mt-4"
+                        role="alert"
+                        v-else
+                      >
+                        There are no Candidates for the selected area
+                      </div>
                     </div>
                   </div>
                 </div>

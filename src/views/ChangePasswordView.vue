@@ -90,7 +90,7 @@ onMounted(() => {
   const temp = sessionStorage.getItem("userDetails");
   if (!temp) return router.replace("/login");
   user.value = JSON.parse(temp);
-  console.log({ user: user.value });
+  // console.log({ user: user.value });
 });
 </script>
 

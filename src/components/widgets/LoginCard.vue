@@ -22,7 +22,7 @@ const login = () => {
       const data: User = response.data;
       // console.log({ data });
 
-      if (data.firstTime || data.reset) {
+      if (data.reset) {
         // change password
         sessionStorage.setItem(
           "userDetails",
@@ -56,7 +56,7 @@ onMounted(() => {
   const session = getUserSession();
   if (!session) return;
   if (!session.user) return;
-  console.log({ session });
+  // console.log({ session });
   if (session.user.id) router.push("/");
 });
 </script>

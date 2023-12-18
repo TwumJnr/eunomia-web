@@ -48,7 +48,7 @@ const addUser = () => {
     .post(`/v1/users/add`, postBody)
     .then((response) => {
       console.log({ response });
-      // @ts-ignore
+
       newUser.value = {
         firstName: "",
         lastName: "",

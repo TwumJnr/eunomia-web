@@ -617,7 +617,6 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            {{ selectedPosition }}
           </div>
         </div>
       </div>

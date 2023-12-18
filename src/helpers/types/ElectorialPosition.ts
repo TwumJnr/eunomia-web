@@ -1,3 +1,4 @@
+import { Candidate } from "./Candidate";
 import { ElectorialArea } from "./ElectorialArea";
 
 export interface ElectorialPosition {
@@ -6,7 +7,7 @@ export interface ElectorialPosition {
   numberRequired: number;
   event: Event;
   areas?: ElectorialArea[];
-  // candidates: Candidate[];
+  candidates?: Candidate[];
   createdAt?: Date;
   updatedAt?: Date;
 }

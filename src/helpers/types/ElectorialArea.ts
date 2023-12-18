@@ -8,7 +8,6 @@ export interface ElectorialArea {
   areaName: string;
   candidates?: Candidate[];
   centers?: PollingCenter[];
-  // positions: ElectorialPosition[];
   event: Event;
   createdBy?: User;
   createdAt?: Date;

@@ -1,6 +1,7 @@
 import { ElectorialArea } from "./ElectorialArea";
 import { ElectorialPosition } from "./ElectorialPosition";
 import { Event } from "./Event";
+import { Result } from "./Result";
 import { User } from "./Users";
 
 export interface Candidate {
@@ -11,7 +12,7 @@ export interface Candidate {
   name?: string;
   gender: string;
   img?: string;
-  // results: Result[];
+  results?: Result[];
   electorialArea?: ElectorialArea;
   event?: Event;
   electorialPosition?: ElectorialPosition;

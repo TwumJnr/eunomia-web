@@ -1,12 +1,13 @@
 import { ElectorialArea } from "./ElectorialArea";
 import { ElectorialPosition } from "./ElectorialPosition";
+import { Result } from "./Result";
 import { User } from "./Users";
 
 export interface Event {
   id?: string;
   eventName: string;
   eventDate: string;
-  // results?: Result[];
+  results?: Result[];
   participatingAreas?: ElectorialArea[];
   positions?: ElectorialPosition[];
   createdBy?: User;

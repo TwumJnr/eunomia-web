@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import type { Event } from "@/helpers/types/Event";
 import type { ElectorialArea } from "@/helpers/types/ElectorialArea";
 import type { ElectorialPosition } from "@/helpers/types/ElectorialPosition";
+import type { PollingCenter } from "@/helpers/types/PollingCenter";
 import type { Candidate } from "@/helpers/types/Candidate";
 import { onMounted, ref, inject, computed } from "vue";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -34,15 +35,51 @@ const selectedArea: Ref<ElectorialArea> = ref({
   areaName: "",
   event: eventDetails.value,
 });
+const selectedAreaView: Ref<ElectorialArea> = ref({
+  areaName: "",
+  event: eventDetails.value,
+});
 const newArea: Ref<ElectorialArea> = ref({
   areaName: "",
   event: eventDetails.value,
+});
+const newPollingCenter: Ref<PollingCenter> = ref({
+  centerName: "",
+  electorialArea: selectedAreaView.value,
 });
 const newPosition: Ref<ElectorialPosition> = ref({
   positionName: "",
   numberRequired: 1,
   event: eventDetails.value,
 });
+
+const addCenter = () => {
+  loading.value = true;
+
+  const postBody = {
+    ...newPollingCenter.value,
+    electorialArea: selectedAreaView.value.id,
+    event: eventId,
+  };
+
+  axios!
+    .post("/v1/polling-center/add", postBody)
+    .then((response) => {
+      document.getElementById("newCenterModalClose")?.click();
+      newPollingCenter.value = {
+        centerName: "",
+        electorialArea: selectedAreaView.value,
+      };
+      const data = response.data.data;
+      selectedAreaView.value.centers?.push(data);
+    })
+    .catch((error) => {
+      console.log({ error });
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 
 const addCandidate = () => {
   loading.value = true;
@@ -64,7 +101,7 @@ const addCandidate = () => {
         otherName: "",
         gender: "",
       };
-      const data = response.data;
+      const data = response.data.data;
       selectedArea.value.candidates?.push(data);
     })
     .catch((error) => {
@@ -267,6 +304,9 @@ onMounted(() => {
               </div>
               <div
                 class="entry"
+                @click="selectedAreaView = area"
+                data-bs-toggle="modal"
+                data-bs-target="#viewAreaModal"
                 v-for="(area, i) in eventDetails.participatingAreas"
                 :key="i"
               >
@@ -476,6 +516,67 @@ onMounted(() => {
       </div>
     </div>
 
+    <!--  Electorial Area Details Modal -->
+    <div
+      class="modal fade"
+      id="viewAreaModal"
+      aria-labelledby="viewAreaModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="viewAreaModalLabel">
+              {{ selectedAreaView.areaName }} Electorial Area Polling Centers
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              id="viewAreaModalClose"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            />
+          </div>
+          <div class="modal-body">
+            <div
+              class="mb-4 p-2"
+              v-if="
+                selectedAreaView.centers && selectedAreaView.centers?.length > 0
+              "
+            >
+              <p
+                class="m-0 py-1"
+                style="border-bottom: 1px dashed var(--blue-20)"
+                v-for="(center, i) in selectedAreaView.centers"
+                :key="i"
+              >
+                <span class="mr-2" style="font-size: 0.6rem">{{ i + 1 }}</span>
+                <span>{{ center.centerName }}</span>
+              </p>
+            </div>
+            <div class="alert alert-warning my-4" v-else role="alert">
+              There are no polling centers available for this electorial area
+            </div>
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-primary"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#newCenterModal"
+                style="
+                  color: var(--white);
+                  font-weight: bolder;
+                  box-shadow: var(--shadow);
+                "
+              >
+                Add Polling Center
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!--  Position Details Modal -->
     <div
       class="modal fade"
@@ -678,6 +779,63 @@ onMounted(() => {
                   :disabled="loading"
                 >
                   Add Position
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Polling Center Modal -->
+    <div
+      class="modal fade"
+      id="newCenterModal"
+      aria-labelledby="newCenterModalLabel"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="newCenterModalLabel">
+              Add Polling Center
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              id="newCenterModalClose"
+              data-bs-target="#viewAreaModal"
+              data-bs-toggle="modal"
+              aria-label="Close"
+            />
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="addCenter">
+              <div class="form-floating">
+                <input
+                  class="form-control"
+                  id="areaNameField"
+                  v-model="newPollingCenter.centerName"
+                  placeholder="What is the name of the polling center?"
+                  required
+                />
+                <label for="areaNameField">Center Name</label>
+              </div>
+              <div class="d-grid mt-6">
+                <button
+                  class="btn btn-primary"
+                  style="
+                    color: var(--white);
+                    font-weight: bolder;
+                    box-shadow: var(--shadow);
+                  "
+                  type="submit"
+                  :disabled="loading"
+                >
+                  Add Polling Center
                 </button>
               </div>
             </form>

@@ -25,7 +25,7 @@ export const getUserSession = () => {
   } else router.replace("/login");
 };
 
-export const getUserToken = () => {
+export const getUserToken = (): string | null => {
   const session = sessionStorage.getItem("userDetails");
   if (!session) return null;
 

@@ -1,12 +1,13 @@
 import { Candidate } from "./Candidate";
 import { Event } from "./Event";
+import { PollingCenter } from "./PollingCenter";
 import { User } from "./Users";
 
 export interface ElectorialArea {
   id?: string;
   areaName: string;
   candidates?: Candidate[];
-  // centers: PollingCenter[];
+  centers?: PollingCenter[];
   // positions: ElectorialPosition[];
   event: Event;
   createdBy?: User;

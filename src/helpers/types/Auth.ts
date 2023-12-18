@@ -3,9 +3,8 @@ export interface Auth {
   username: string;
   apiKey?: string;
   status: boolean;
-  firstTime: boolean;
   reset: boolean;
-  createdBy: string;
+  createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
 }

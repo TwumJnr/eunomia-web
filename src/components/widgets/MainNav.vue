@@ -9,6 +9,8 @@ const userRole = ref("");
 onMounted(() => {
   const session = getUserSession();
   if (!session) return router.replace("/login");
+  // console.log({ session });
+  userRole.value = session.role;
 });
 </script>
 
@@ -26,7 +28,7 @@ onMounted(() => {
           type="button"
           to="/users"
           class="btn mx-2"
-          v-if="$route.path !== '/users' && userRole === 'Super Admin'"
+          v-if="$route.path !== '/users'"
         >
           Users
         </RouterLink>

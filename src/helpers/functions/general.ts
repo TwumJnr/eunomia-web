@@ -49,9 +49,11 @@ export const isAuthenticated = () => {
   return false;
 };
 
-export const getUserName = (
-  user = { firstName: "", lastName: "", otherName: "" }
-) => {
+export const getUserName = (user: {
+  firstName: string;
+  lastName: string;
+  otherName?: string;
+}) => {
   let name = user.firstName;
   name += user.otherName ? ` ${user.otherName}` : "";
   name += ` ${user.lastName}`;

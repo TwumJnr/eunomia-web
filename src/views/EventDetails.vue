@@ -593,6 +593,7 @@ onMounted(() => {
                         <div
                           class="entry"
                           v-for="(candidate, i) in selectedArea.candidates"
+                          :key="i"
                         >
                           <span class="count">{{ i + 1 }}</span>
                           <span class="label">{{

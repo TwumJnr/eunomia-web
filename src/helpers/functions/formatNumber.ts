@@ -1,10 +1,20 @@
 import numeral from "numeral";
 import { ToWords } from "to-words";
 
-const converter = new ToWords({
+const currencyConverter = new ToWords({
   localeCode: "en-GH",
   converterOptions: {
     currency: true,
+    ignoreDecimal: false,
+    ignoreZeroCurrency: false,
+    doNotAddOnly: false,
+  },
+});
+
+const numberConverter = new ToWords({
+  localeCode: "en-GH",
+  converterOptions: {
+    currency: false,
     ignoreDecimal: false,
     ignoreZeroCurrency: false,
     doNotAddOnly: false,
@@ -40,7 +50,12 @@ export const formatCedis = (value: number | string | undefined | null) => {
 
 export const getPaymentWords = (amount: number | undefined | null): string => {
   if (!amount) return " - ";
-  return converter.convert(amount);
+  return currencyConverter.convert(amount);
+};
+
+export const getNumberWords = (number: number | undefined | null): string => {
+  if (!number) return " - ";
+  return numberConverter.convert(number);
 };
 
 // export function formatNumber(value) {

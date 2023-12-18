@@ -4,10 +4,11 @@ import { useRoute, useRouter } from "vue-router";
 import type { Event } from "@/helpers/types/Event";
 import type { ElectorialArea } from "@/helpers/types/ElectorialArea";
 import type { ElectorialPosition } from "@/helpers/types/ElectorialPosition";
-import { onMounted, ref, inject } from "vue";
+import { onMounted, ref, inject, computed } from "vue";
 import { AxiosInstance, AxiosResponse } from "axios";
 import type { Ref } from "vue";
 import { formatDate } from "@/helpers/functions/date";
+import { getNumberWords } from "@/helpers/functions/formatNumber";
 
 const route = useRoute();
 const router = useRouter();
@@ -18,17 +19,73 @@ const eventId = route.query.q;
 const selectedPosition: Ref<ElectorialPosition | null> = ref(null);
 
 const loading = ref(false);
+const availableAreas: Ref<ElectorialArea[]> = ref([]);
+const tempAreas: Ref<ElectorialArea[]> = ref([]);
 const eventDetails: Ref<Event> = ref({ eventName: "", eventDate: "" });
-const newArea: Ref<ElectorialArea> = ref({ areaName: "", event: eventDetails });
+const selectedArea: Ref<ElectorialArea> = ref({
+  areaName: "",
+  event: eventDetails.value,
+});
+const newArea: Ref<ElectorialArea> = ref({
+  areaName: "",
+  event: eventDetails.value,
+});
 const newPosition: Ref<ElectorialPosition> = ref({
   positionName: "",
   numberRequired: 1,
-  event: eventDetails,
+  event: eventDetails.value,
 });
-const availableAreas: Ref<ElectorialArea[]> = ref([]);
+
+const selectArea = (area: ElectorialArea) => {
+  selectedArea.value = area;
+};
+
+const filteredAreas = computed(() => {
+  return availableAreas.value.filter(
+    (area) => !tempAreas.value.some((tempArea) => tempArea.id === area.id)
+  );
+});
+
+const removeAreaFromTemp = (areaToRemove: ElectorialArea) => {
+  const areaIndex = tempAreas.value.findIndex(
+    (area) => area.id === areaToRemove.id
+  );
+
+  if (areaIndex !== -1) {
+    tempAreas.value.splice(areaIndex, 1);
+  }
+};
+
+const applyAreaAssignment = () => {
+  loading.value = true;
+
+  const params = { id: selectedPosition.value?.id };
+  axios!
+    .put(
+      "/v1/electorial-position/modify",
+      { ...selectedPosition.value, areas: tempAreas.value },
+      { params }
+    )
+    .then((response) => {
+      const data = response.data;
+      // console.log({ data });
+      selectedPosition.value = data;
+      document.getElementById("assignLocationModalClose")?.click();
+    })
+    .catch((error) => {
+      console.log({ error });
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 
 const viewPosition = (position: ElectorialPosition) => {
   selectedPosition.value = position;
+  if (position.areas) {
+    tempAreas.value = [...position.areas];
+    selectedArea.value = tempAreas.value[0];
+  } else tempAreas.value = [];
 };
 
 const getEventDetails = () => {
@@ -58,6 +115,7 @@ const addArea = () => {
     .post("/v1/electorial-area/add", { ...newArea.value, event: eventId })
     .then(() => {
       document.getElementById("newAreaModalClose")?.click();
+      newArea.value = { areaName: "", event: eventDetails.value };
       // const data = response.data;
       // console.log({ data });
       getEventDetails();
@@ -195,6 +253,93 @@ onMounted(() => {
       </div> -->
     </div>
 
+    <!--  Assign Area Modal -->
+    <div
+      class="modal fade"
+      id="assignLocationModal"
+      aria-labelledby="assignLocationModalLabel"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="assignLocationModalLabel">
+              Apply Electorial Area
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              id="assignLocationModalClose"
+              data-bs-toggle="modal"
+              data-bs-target="#positionDetailsModal"
+              aria-label="Close"
+            />
+          </div>
+          <div class="modal-body">
+            <div class="d-flex mb-2">
+              <button
+                class="btn btn-outline-primary btn-sm mr-1"
+                style="border-radius: 50rem"
+                @click="removeAreaFromTemp(area)"
+                v-for="(area, i) in tempAreas"
+                :key="i"
+              >
+                <div class="d-flex align-items-center justify-content-between">
+                  <span class="mr-2">
+                    {{ area.areaName }}
+                  </span>
+                  <span class="material-symbols-rounded"> close </span>
+                </div>
+              </button>
+            </div>
+            <div
+              class="entry"
+              v-for="(area, i) in filteredAreas"
+              :key="i"
+              @click="tempAreas.push(area)"
+            >
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="count">{{ i + 1 }}</span>
+                  <span class="label" style="font-size: 1.5rem">
+                    {{ area.areaName }}
+                  </span>
+                </div>
+                <span class="material-symbols-rounded"> add_circle </span>
+              </div>
+            </div>
+
+            <div
+              class="alert alert-warning m-0 mt-4"
+              role="alert"
+              v-if="filteredAreas.length === 0"
+            >
+              There are no Electorial Areas available
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+              <button
+                class="btn btn-primary"
+                style="
+                  color: var(--white);
+                  font-weight: bolder;
+                  box-shadow: var(--shadow);
+                "
+                @click="applyAreaAssignment"
+                :disabled="tempAreas.length === 0 || loading"
+                type="button"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!--  Position Details Modal -->
     <div
       class="modal fade"
@@ -219,11 +364,79 @@ onMounted(() => {
             />
           </div>
           <div class="modal-body">
-            <div>
-              <h6 class="m-0">Position Name:</h6>
-              <span style="font-size: 2rem">
-                {{ selectedPosition?.positionName }}
-              </span>
+            <div class="row">
+              <div class="col-md">
+                <h6 class="m-0">Position Name:</h6>
+                <span style="font-size: 2rem; font-weight: lighter">
+                  {{ selectedPosition?.positionName }}
+                </span>
+              </div>
+              <div class="col-md">
+                <h6 class="m-0">Number of slots:</h6>
+                <span style="font-size: 2rem; font-weight: lighter">
+                  {{ getNumberWords(selectedPosition?.numberRequired) }}
+                  ({{ selectedPosition?.numberRequired }})
+                </span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md">
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <h6 class="m-0">Electorial Areas</h6>
+                      <button
+                        class="btn"
+                        data-bs-toggle="modal"
+                        data-bs-target="#assignLocationModal"
+                      >
+                        <div class="d-flex align-items-center">
+                          <span class="material-symbols-rounded">
+                            add_circle
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                    <div
+                      class="mt-4"
+                      v-if="
+                        selectedPosition?.areas &&
+                        selectedPosition.areas?.length > 0
+                      "
+                    >
+                      <div
+                        class="entry"
+                        v-for="(area, i) in selectedPosition.areas"
+                        :key="i"
+                        :class="{ active: selectedArea.id === area.id }"
+                        @click="selectArea(area)"
+                      >
+                        <span class="count">{{ i + 1 }}</span>
+                        <span class="label">{{ area.areaName }}</span>
+                      </div>
+                    </div>
+                    <div
+                      class="alert alert-warning m-0 mt-4"
+                      role="alert"
+                      v-else
+                    >
+                      There are no Electorial Areas assigned to this position
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md">
+                <div class="d-flex align-items-center" style="height: 100%">
+                  <div class="card" style="width: 100%">
+                    <div class="card-body">
+                      <h6>Candidates</h6>
+                      <span>Candidates come here </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             {{ selectedPosition }}
           </div>
@@ -354,10 +567,18 @@ onMounted(() => {
 .entry {
   padding: 0.5rem;
   transition: var(--transition);
+  // *{
+  //   &:hover{
+  //     cursor: pointer;
+  //   }
+  // }
+  &.active {
+    background-color: var(--blue-30);
+  }
   &:hover {
-    background-color: var(--font-color-faded-20);
+    background-color: var(--blue-20);
     cursor: pointer;
-    span {
+    * {
       cursor: pointer;
     }
   }

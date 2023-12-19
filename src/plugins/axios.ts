@@ -1,17 +1,10 @@
 import axios, { AxiosInstance } from "axios";
 import type { App } from "vue";
-import { getUserToken } from "@/helpers/functions/general";
 
 const baseURL = process.env.VUE_APP_BASE_URL;
-const token = () => {
-  return getUserToken();
-};
 
 const instance: AxiosInstance = axios.create({
   baseURL,
-  headers: {
-    Authorization: `Bearer ${token()}`,
-  },
 });
 
 // export default {

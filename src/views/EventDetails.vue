@@ -12,6 +12,11 @@ import type { Ref } from "vue";
 import { formatDate } from "@/helpers/functions/date";
 import { getUserName } from "@/helpers/functions/general";
 import { getNumberWords } from "@/helpers/functions/formatNumber";
+import { getUserToken } from "@/helpers/functions/general";
+
+const headers = {
+  Authorization: `Bearer ${getUserToken()}`,
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -63,7 +68,7 @@ const addCenter = () => {
   };
 
   axios!
-    .post("/v1/polling-center/add", postBody)
+    .post("/v1/polling-center/add", postBody, { headers })
     .then((response) => {
       document.getElementById("newCenterModalClose")?.click();
       newPollingCenter.value = {
@@ -92,7 +97,7 @@ const addCandidate = () => {
   };
 
   axios!
-    .post("/v1/candidates/add", postBody)
+    .post("/v1/candidates/add", postBody, { headers })
     .then((response) => {
       document.getElementById("addCandidateModalClose")?.click();
       newCandidate.value = {
@@ -140,7 +145,7 @@ const applyAreaAssignment = () => {
     .put(
       "/v1/electorial-position/modify",
       { ...selectedPosition.value, areas: tempAreas.value },
-      { params }
+      { params, headers }
     )
     .then((response) => {
       const data = response.data;
@@ -169,7 +174,7 @@ const getEventDetails = () => {
 
   const params = { id: eventId };
   axios!
-    .get("/v1/events/details", { params })
+    .get("/v1/events/details", { params, headers })
     .then((response: AxiosResponse) => {
       const data = response.data;
       eventDetails.value = data.data;
@@ -188,7 +193,11 @@ const addArea = () => {
   loading.value = true;
 
   axios!
-    .post("/v1/electorial-area/add", { ...newArea.value, event: eventId })
+    .post(
+      "/v1/electorial-area/add",
+      { ...newArea.value, event: eventId },
+      { headers }
+    )
     .then(() => {
       document.getElementById("newAreaModalClose")?.click();
       newArea.value = { areaName: "", event: eventDetails.value };
@@ -206,10 +215,14 @@ const addPosition = () => {
   loading.value = true;
 
   axios!
-    .post("/v1/electorial-position/add", {
-      ...newPosition.value,
-      event: eventId,
-    })
+    .post(
+      "/v1/electorial-position/add",
+      {
+        ...newPosition.value,
+        event: eventId,
+      },
+      { headers }
+    )
     .then(() => {
       document.getElementById("newPositionModalClose")?.click();
       // const data = response.data;

@@ -7,6 +7,11 @@ import { AxiosInstance } from "axios";
 import type { Ref } from "vue";
 import { formatDate } from "@/helpers/functions/date";
 import { useRouter } from "vue-router";
+import { getUserToken } from "@/helpers/functions/general";
+
+const headers = {
+  Authorization: `Bearer ${getUserToken()}`,
+};
 
 const axios = inject<AxiosInstance>("axios");
 
@@ -24,7 +29,7 @@ const getAllEvents = () => {
   loading.value = true;
 
   axios!
-    .get("/v1/events")
+    .get("/v1/events", { headers })
     .then((response) => {
       const data = response.data;
       // console.log({ data });
@@ -43,7 +48,7 @@ const addEvent = () => {
   loading.value = true;
 
   axios!
-    .post("/v1/events/add", newEvent.value)
+    .post("/v1/events/add", newEvent.value, { headers })
     .then(() => {
       document.getElementById("newEventModalClose")?.click();
       // const data = response.data;

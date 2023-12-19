@@ -7,6 +7,11 @@ import { dateTime, formatDateMin } from "@/helpers/functions/date";
 import { Event } from "@/helpers/types/Event";
 import { ElectorialArea } from "@/helpers/types/ElectorialArea";
 import { PollingCenter } from "@/helpers/types/PollingCenter";
+import { getUserToken } from "@/helpers/functions/general";
+
+const headers = {
+  Authorization: `Bearer ${getUserToken()}`,
+};
 
 const axios = inject<AxiosInstance>("axios");
 
@@ -15,7 +20,7 @@ const users: Ref<User[]> = ref([]);
 const events: Ref<Event[]> = ref([]);
 const electorialAreas: Ref<ElectorialArea[]> = ref([]);
 const pollingCenters: Ref<PollingCenter[]> = ref([]);
-const headers = [
+const tableHeaders = [
   { key: "name", value: "Name", sortable: true, class: "" },
   { key: "email", value: "Email Address", sortable: true, class: "" },
   { key: "createdAt", value: "Date Created", sortable: true, class: "" },
@@ -45,7 +50,7 @@ const addUser = () => {
   loading.value = true;
   const postBody = { ...newUser.value };
   axios!
-    .post(`/v1/users/add`, postBody)
+    .post(`/v1/users/add`, postBody, { headers })
     .then(() => {
       // console.log({ response });
 
@@ -98,7 +103,7 @@ const getEvents = () => {
   loading.value = true;
 
   axios!
-    .get("/v1/events/set")
+    .get("/v1/events/set", { headers })
     .then((response) => {
       const data: Event[] = response.data.data;
       // console.log({ data });
@@ -116,7 +121,7 @@ const getUsers = () => {
   loading.value = true;
 
   axios!
-    .get(`/v1/users`)
+    .get(`/v1/users`, { headers })
     .then((response) => {
       const data: User[] = response.data.data;
       // console.log({ data });
@@ -161,7 +166,11 @@ onMounted(() => {
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th class="text-left" v-for="(head, i) in headers" :key="i">
+                    <th
+                      class="text-left"
+                      v-for="(head, i) in tableHeaders"
+                      :key="i"
+                    >
                       {{ head.value }}
                     </th>
                   </tr>

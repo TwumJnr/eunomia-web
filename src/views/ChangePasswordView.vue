@@ -5,7 +5,11 @@ import type { Ref } from "vue";
 import { onMounted, computed, inject } from "vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { getUserToken } from "@/helpers/functions/general";
 
+const headers = {
+  Authorization: `Bearer ${getUserToken()}`,
+};
 const axios = inject<AxiosInstance>("axios");
 
 const router = useRouter();
@@ -63,9 +67,11 @@ const changePassword = () => {
   // }
 
   loading.value = true;
+  const params = { id: patchBody.id };
   axios!
     .put(`/v1/auth/auth-string`, patchBody, {
-      params: { id: patchBody.id },
+      params,
+      headers,
     })
     .then(() => {
       // const data = response.data;

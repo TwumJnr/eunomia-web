@@ -412,6 +412,7 @@ onMounted(() => {
                     <select
                       class="form-select"
                       id="genderField"
+                      v-model="newCandidate.gender"
                       aria-label="Floating label select example"
                     >
                       <option selected disabled>-- Gender --</option>
